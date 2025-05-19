@@ -1,9 +1,15 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uuid
+import random
 
+# Spotify song ids
 songs = []
+
+# Tuble (uuid, ready)
 players = []
+
+cur_pair: tuple
 
 app = FastAPI()
 
@@ -16,7 +22,7 @@ async def getcur():
 
 @app.get("/status")
 async def status():
-
+    return ""
 
 @app.get("/ready")
 async def ready(id: str):
@@ -28,9 +34,14 @@ async def submit(song: Song):
     songs.append(song.song)
     print(song.song, "added")
 
-    # Adds Player
+    # Generates and adds Player
     playeruuid = uuid.uuid4()
     players.append((uuid, False))
     print("Player added, uuid:", uuid)
 
     return str(playeruuid)
+
+def start():
+    random.shuffle(songs)
+
+    cur_pair(songs[0], songs[0 + 1])
