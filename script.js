@@ -54,32 +54,40 @@ function startBattle() {
 }
 
 function showNextBattle() {
-  if (currentIndex >= currentPairs.length) {
-    if (nextRound.length === 1) {
-      document.querySelector('#battle').innerHTML = `
-        <h2>🏆 Der Gewinner ist:</h2>
-        <iframe width="560" height="315" src="${nextRound[0]}" frameborder="0" allowfullscreen></iframe>
-      `;
-      return;
+    if (currentIndex >= currentPairs.length) {
+      if (nextRound.length === 1) {
+        document.querySelector('#battle').innerHTML = `
+          <h2>🏆 Der Gewinner ist:</h2>
+          <iframe width="560" height="315" src="${nextRound[0]}" frameborder="0" allowfullscreen></iframe>
+        `;
+        return;
+      }
+      currentPairs = nextRound;
+      nextRound = [];
+      currentIndex = 0;
+      round++;
+      document.getElementById('round-number').textContent = round;
     }
-    currentPairs = nextRound;
-    nextRound = [];
-    currentIndex = 0;
-    round++;
-    document.getElementById('round-number').textContent = round;
+  
+    const song1 = currentPairs[currentIndex];
+    const song2 = currentPairs[currentIndex + 1];
+  
+    document.getElementById('song1').innerHTML = `
+      <iframe width="100%" height="200" src="${song1}" frameborder="0" allowfullscreen></iframe>
+      <button class="vote">Wähle diesen Song</button>
+    `;
+  
+    document.getElementById('song2').innerHTML = `
+      <iframe width="100%" height="200" src="${song2}" frameborder="0" allowfullscreen></iframe>
+      <button class="vote">Wähle diesen Song</button>
+    `;
+  
+    document.querySelectorAll('.vote').forEach((btn, idx) => {
+      btn.onclick = () => {
+        nextRound.push(idx === 0 ? song1 : song2);
+        currentIndex += 2;
+        showNextBattle();
+      };
+    });
   }
-
-  const song1 = currentPairs[currentIndex];
-  const song2 = currentPairs[currentIndex + 1];
-
-  document.querySelector('#song1 iframe').src = song1;
-  document.querySelector('#song2 iframe').src = song2;
-
-  document.querySelectorAll('.vote').forEach((btn, idx) => {
-    btn.onclick = () => {
-      nextRound.push(idx === 0 ? song1 : song2);
-      currentIndex += 2;
-      showNextBattle();
-    };
-  });
-}
+  
