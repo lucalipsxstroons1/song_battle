@@ -46,7 +46,6 @@ async def post_submit(song: Song):
         raise HTTPException(status_code=403, detail="Game already started")
     
     # Prüfen auf doppelte Songs
-    # Prüfen auf doppelte Songs
     for entry in submitted_songs:
         if entry.id.lower() == song.song.lower():
             raise HTTPException(
