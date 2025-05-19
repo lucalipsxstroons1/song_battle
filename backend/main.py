@@ -40,7 +40,7 @@ async def submit(song: Song):
 
     # Song speichern
     submitted_songs[player_id] = song.song
-    players.add(player_id)
+    players.append(player_id)
 
     print(f"Spieler {player_id} hat Song {song.song} eingereicht")
 
