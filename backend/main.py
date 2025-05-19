@@ -101,7 +101,14 @@ async def post_vote(song: Song, player_uuid: str):
     if not playerid in ready_players:
         raise HTTPException(status_code=403, detail="Not a valid player")
 
-    return str(vote(playerid, song.song))
+    return vote(playerid, song.song)
+
+@app.get("/votes")
+async def get_votes():
+    return { 
+        cur_songs[0].id: len(cur_songs[0].votes),
+        cur_songs[1].id: len(cur_songs[1].votes),
+        }
 
 def start():
     global status
@@ -120,4 +127,8 @@ def vote(player: uuid.UUID, song: str):
         if cur_song.id == song:
             cur_song.votes.add(player)
             print(player, "voted for song:", cur_song.id)
+
+            for cur_song in cur_songs:
+                print(len(cur_song.votes))
+
             return len(cur_song.votes)
