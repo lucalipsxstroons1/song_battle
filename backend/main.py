@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Set
-from fastapi.responses import JSONResponse
 import uuid
 import random
 
@@ -12,6 +11,7 @@ status = 0
 
 # Spieler-ID → Song-ID
 submitted_songs: Dict[uuid.UUID, str] = {}
+cur_songs = []
 
 # Spieler-ID (die sich als ready gemeldet haben)
 ready_players: Set[uuid.UUID] = set()
@@ -20,7 +20,12 @@ players = []
 # Anzahl benötigter Spieler
 required_players = 4
 
-# ==== Datenmodelle ====
+class Cur_Song():
+    def __init__(self, id):
+        self.id = id
+
+    votes: Set[uuid.UUID] = set()
+    id: str
 
 class Song(BaseModel):
     song: str
@@ -43,7 +48,7 @@ async def submit(song: Song):
 
 @app.get("/getcur")
 async def getcur():
-    return ["51GmZjHgR1sWkHWqpQzpEa", "3cLXgIlvugVKpWBmO5v9oy"]
+    return cur_songs
 
 @app.get("/status")
 async def status():
@@ -65,6 +70,14 @@ async def ready(id: str):
     return {"status": "waiting" }
 
 def start():
+    assert status == 0
+
     status = 1
     random.shuffle(submitted_songs)
-    return
+    cur_songs[Song(submitted_songs[0]), Song(submitted_songs[1])]
+
+def vote(player: uuid.UUID, song: str):
+    for cur_song in cur_songs:
+        if cur_song.id == song:
+            cur_song.votes.add(player)
+            print(player, "voted for song:", cur_song.id)
