@@ -1,21 +1,33 @@
-<div class="container">
-  <h1>🎶 Song Battle</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Music Song-Battle</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Music Song-battle</h1>
+    <p class="subtitle">Insert your Song and click ready when you are</p>
 
-  <div id="submit-section">
-    <input type="text" id="song-input" placeholder="Spotify-Link einfügen" />
-    <button id="submit-btn">Song einreichen</button>
+    <div class="input-wrapper" id="submit-section">
+      <input type="text" id="song-input" placeholder="Paste your Spotify URL here..." />
+      <button id="submit-btn">Submit</button>
+    </div>
+
+    <div id="ready-section" style="display: none;">
+      <button id="ready-btn">I'm Ready</button>
+    </div>
+
+    <div id="status">
+      <p>🎵 Submitted Songs: <span id="num-submitted">0</span></p>
+      <p>✅ Players Ready: <span id="num-ready">0</span></p>
+      <p>🚀 Game Ready: <span id="game-ready">Nein</span></p>
+    </div>
   </div>
 
-  <div id="ready-section" style="display: none;">
-    <p>Song eingereicht! Du kannst dich jetzt als bereit markieren:</p>
-    <button id="ready-btn">Ich bin bereit</button>
-  </div>
-
-  <hr>
-
-  <div id="status">
-    <p><strong>Eingereichte Songs:</strong> <span id="num-submitted">0</span></p>
-    <p><strong>Bereite Spieler:</strong> <span id="num-ready">0</span></p>
-    <p><strong>Spielbereit:</strong> <span id="game-ready">Nein</span></p>
-  </div>
-</div>
+  <script src="script.js"></script>
+</body>
+</html>

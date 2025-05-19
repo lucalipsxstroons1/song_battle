@@ -29,18 +29,14 @@ readyBtn.onclick = async () => {
   });
 
   const data = await response.json();
-
   if (data.status === "start") {
     alert("🎮 Das Spiel beginnt!");
-    console.log("Songs im Spiel:", data.songs);
-    // Optional: Weiterleitung auf andere Seite
-    // window.location.href = "/game.html";
+    console.log(data.songs); // z.B. speichern oder zur nächsten Seite navigieren
   } else {
     alert("Warte auf weitere Spieler...");
   }
 };
 
-// Status regelmäßig abrufen
 setInterval(fetchStatus, 5000);
 
 async function fetchStatus() {
@@ -52,6 +48,6 @@ async function fetchStatus() {
     document.getElementById("num-ready").textContent = data.num_ready;
     document.getElementById("game-ready").textContent = data.game_ready ? "Ja" : "Nein";
   } catch (err) {
-    console.error("Fehler beim Status-Abrufen:", err);
+    console.error("Fehler beim Status abrufen:", err);
   }
 }
