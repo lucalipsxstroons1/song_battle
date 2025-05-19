@@ -78,19 +78,5 @@ async def ready(id: str):
     return {"status": "waiting" }
 
 def start():
-<<<<<<< HEAD
     songs = list(submitted_songs.values())
     random.shuffle(songs)
-=======
-    assert status == 0
-
-    status = 1
-    random.shuffle(submitted_songs)
-    cur_songs[Song(submitted_songs[0]), Song(submitted_songs[1])]
-
-def vote(player: uuid.UUID, song: str):
-    for cur_song in cur_songs:
-        if cur_song.id == song:
-            cur_song.votes.add(player)
-            print(player, "voted for song:", cur_song.id)
->>>>>>> e605d945d5e0ec65a631be694141f9d620f9214e
