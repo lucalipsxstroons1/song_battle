@@ -26,6 +26,7 @@ ready_players: Set[uuid.UUID] = set()
 players = set()
 
 # Anzahl benötigter Spieler
+required_players = 2
 required_players = 1
 
 class Cur_Song():
@@ -78,5 +79,14 @@ async def ready(id: str):
     return {"status": "waiting" }
 
 def start():
-    songs = list(submitted_songs.values())
-    random.shuffle(songs)
+    assert status == 0
+
+    status = 1
+    random.shuffle(submitted_songs)
+    cur_songs[Song(submitted_songs[0]), Song(submitted_songs[1])]
+
+def vote(player: uuid.UUID, song: str):
+    for cur_song in cur_songs:
+        if cur_song.id == song:
+            cur_song.votes.add(player)
+            print(player, "voted for song:", cur_song.id)
