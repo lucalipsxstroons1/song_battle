@@ -44,6 +44,11 @@ class Song(BaseModel):
 async def post_submit(song: Song):
     if status == 1:
         raise HTTPException(status_code=403, detail="Game already started")
+    
+    # Prüfen auf doppelte Songs
+    for entry in submitted_songs:
+        if entry.song.lower() == song.song.lower():
+            raise HTTPException(status_code=400, detail="Song wurde bereits eingereicht.")
 
     # UUID für Spieler erzeugen
     player_id = uuid.uuid4()
