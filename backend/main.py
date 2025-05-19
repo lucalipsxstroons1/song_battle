@@ -4,8 +4,16 @@ from typing import Dict, Set
 from fastapi.responses import JSONResponse
 import uuid
 import random
-
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Oder z. B. ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 1 = Runnging, 0 = Waiting
 status = 0
@@ -15,10 +23,10 @@ submitted_songs: Dict[uuid.UUID, str] = {}
 
 # Spieler-ID (die sich als ready gemeldet haben)
 ready_players: Set[uuid.UUID] = set()
-players = []
+players = set()
 
 # Anzahl benötigter Spieler
-required_players = 4
+required_players = 1
 
 # ==== Datenmodelle ====
 
@@ -65,6 +73,5 @@ async def ready(id: str):
     return {"status": "waiting" }
 
 def start():
-    status = 1
-    random.shuffle(submitted_songs)
-    return
+    songs = list(submitted_songs.values())
+    random.shuffle(songs)
