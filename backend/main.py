@@ -73,6 +73,14 @@ async def get_ready(id: str):
 
     return {"status": "waiting" }
 
+@app.post("/vote")
+async def post_vote(song: Song, player_uuid: str):
+    if status == 0:
+        raise HTTPException(status_code=403, detail="Game not started")
+
+    playerid = uuid.UUID(player_uuid)
+    return vote(playerid, song.song)
+
 def start():
     global status
     assert status == 0
@@ -86,3 +94,4 @@ def vote(player: uuid.UUID, song: str):
         if cur_song.id == song:
             cur_song.votes.add(player)
             print(player, "voted for song:", cur_song.id)
+            return len(cur_song.votes)
