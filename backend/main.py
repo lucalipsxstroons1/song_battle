@@ -24,6 +24,15 @@ async def getcur():
 
 @app.get("/status")
 async def status():
+    return {
+        "submitted_songs": submitted_songs,
+        "ready_players": list(ready_players),
+        "num_ready": len(ready_players),
+        "num_submitted": len(submitted_songs),
+        "required_players": required_players,
+        "game_ready": len(ready_players) >= required_players and len(submitted_songs) >= required_players
+    }
+
 
 
 @app.post("/ready")
