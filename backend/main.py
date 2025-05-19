@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Set
-from fastapi.responses import JSONResponse
 import uuid
 import random
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +19,7 @@ status = 0
 
 # Spieler-ID → Song-ID
 submitted_songs: Dict[uuid.UUID, str] = {}
+cur_songs = []
 
 # Spieler-ID (die sich als ready gemeldet haben)
 ready_players: Set[uuid.UUID] = set()
@@ -28,7 +28,12 @@ players = set()
 # Anzahl benötigter Spieler
 required_players = 1
 
-# ==== Datenmodelle ====
+class Cur_Song():
+    def __init__(self, id):
+        self.id = id
+
+    votes: Set[uuid.UUID] = set()
+    id: str
 
 class Song(BaseModel):
     song: str
@@ -43,7 +48,7 @@ async def submit(song: Song):
 
     # Song speichern
     submitted_songs[player_id] = song.song
-    players.add(player_id)
+    players.append(player_id)
 
     print(f"Spieler {player_id} hat Song {song.song} eingereicht")
 
@@ -51,7 +56,7 @@ async def submit(song: Song):
 
 @app.get("/getcur")
 async def getcur():
-    return ["51GmZjHgR1sWkHWqpQzpEa", "3cLXgIlvugVKpWBmO5v9oy"]
+    return cur_songs
 
 @app.get("/status")
 async def status():
@@ -73,5 +78,19 @@ async def ready(id: str):
     return {"status": "waiting" }
 
 def start():
+<<<<<<< HEAD
     songs = list(submitted_songs.values())
     random.shuffle(songs)
+=======
+    assert status == 0
+
+    status = 1
+    random.shuffle(submitted_songs)
+    cur_songs[Song(submitted_songs[0]), Song(submitted_songs[1])]
+
+def vote(player: uuid.UUID, song: str):
+    for cur_song in cur_songs:
+        if cur_song.id == song:
+            cur_song.votes.add(player)
+            print(player, "voted for song:", cur_song.id)
+>>>>>>> e605d945d5e0ec65a631be694141f9d620f9214e
