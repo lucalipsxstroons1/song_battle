@@ -66,3 +66,32 @@ button:hover {
   font-size: 1.1rem;
   color: #eee;
 }
+
+.battle-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  margin-top: 30px;
+  gap: 2rem;
+}
+
+.song {
+  flex: 1;
+  min-width: 300px;
+  text-align: center;
+  background: #1e1e1e;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #000;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #1db954;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
