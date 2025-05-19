@@ -1,57 +1,70 @@
 const submitBtn = document.getElementById("submit-btn");
 const readyBtn = document.getElementById("ready-btn");
 
+// Song einreichen
 submitBtn.onclick = async () => {
   const song = document.getElementById("song-input").value.trim();
   if (!song) return alert("Bitte einen Spotify-Link eingeben.");
 
-  const response = await fetch("http://localhost:8000/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ song })
-  });
+  try {
+    const response = await fetch("http://localhost:8000/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ song })
+    });
 
-  const data = await response.json();
-  localStorage.setItem("player_id", data.player_id);
+    if (!response.ok) {
+      const err = await response.json();
+      return alert(`Fehler: ${err.detail}`);
+    }
 
-  document.getElementById("submit-section").style.display = "none";
-  document.getElementById("ready-section").style.display = "block";
+    const data = await response.json();
+    localStorage.setItem("player_id", data.player_id);
+
+    document.getElementById("submit-section").style.display = "none";
+    document.getElementById("ready-section").style.display = "block";
+  } catch (err) {
+    alert("Fehler beim Einreichen des Songs");
+    console.error(err);
+  }
 };
 
+// Als bereit markieren
 readyBtn.onclick = async () => {
   const player_id = localStorage.getItem("player_id");
   if (!player_id) return alert("Kein Spieler-ID gefunden!");
 
-  const response = await fetch("http://localhost:8000/ready", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ player_id })
-  });
+  try {
+    const response = await fetch(`http://localhost:8000/ready?id=${player_id}`);
+    if (!response.ok) {
+      const err = await response.json();
+      return alert(`Fehler: ${err.detail}`);
+    }
 
-  const data = await response.json();
-
-  if (data.status === "start") {
-    alert("🎮 Das Spiel beginnt!");
-    console.log("Songs im Spiel:", data.songs);
-    // Optional: Weiterleitung auf andere Seite
-    // window.location.href = "/game.html";
-  } else {
-    alert("Warte auf weitere Spieler...");
+    const data = await response.json();
+    if (data.status === "start") {
+      alert("🎮 Das Spiel beginnt!");
+      window.location.href = "battle/battle.html";
+    } else {
+      alert("Du bist bereit – warte auf andere Spieler...");
+    }
+  } catch (err) {
+    alert("Fehler beim Ready-Melden");
+    console.error(err);
   }
 };
 
-// Status regelmäßig abrufen
-setInterval(fetchStatus, 5000);
+// Spielstatus regelmäßig abfragen
+setInterval(fetchStatus, 3000);
 
 async function fetchStatus() {
   try {
     const res = await fetch("http://localhost:8000/status");
     const data = await res.json();
 
-    document.getElementById("num-submitted").textContent = data.num_submitted;
-    document.getElementById("num-ready").textContent = data.num_ready;
-    document.getElementById("game-ready").textContent = data.game_ready ? "Ja" : "Nein";
+    const statusText = data.status === 1 ? "Spiel läuft" : "Warten auf Start";
+    document.getElementById("game-status").textContent = statusText;
   } catch (err) {
-    console.error("Fehler beim Status-Abrufen:", err);
+    console.error("Fehler beim Status abrufen:", err);
   }
 }

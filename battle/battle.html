@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎵 Song Battle</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🎶 Song Battle</h1>
+    <h2 id="round-label">Round 1</h2>
+
+    <div class="battle-container">
+      <div class="song" id="song1">
+        <iframe id="iframe1" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        <button onclick="vote(0)">Vote for this Song</button>
+      </div>
+      <div class="song" id="song2">
+        <iframe id="iframe2" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        <button onclick="vote(1)">Vote for this Song</button>
+      </div>
+    </div>
+
+    <div id="winner-section" style="display: none;">
+      <h2>🏆 The Winner is....</h2>
+      <iframe id="winner-iframe" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+    </div>
+  </div>
+
+  <script src="battle.js"></script>
+</body>
+</html>
