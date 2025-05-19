@@ -49,7 +49,7 @@ async def post_submit(song: Song):
 
 @app.get("/getcur")
 async def get_cur():
-    return cur_songs
+    return [ cur_songs[0].id, cur_songs[1].id ]
 
 @app.get("/status")
 async def get_status():
