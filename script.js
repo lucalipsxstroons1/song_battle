@@ -1,84 +1,57 @@
-const form = document.getElementById('song-form');
-const inputsDiv = document.getElementById('inputs');
+const submitBtn = document.getElementById("submit-btn");
+const readyBtn = document.getElementById("ready-btn");
 
-for (let i = 0; i < 5; i++) {
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = `Song ${i + 1} (Spotify-Link)`;
-  input.required = true;
-  inputsDiv.appendChild(input);
-}
+submitBtn.onclick = async () => {
+  const song = document.getElementById("song-input").value.trim();
+  if (!song) return alert("Bitte einen Spotify-Link eingeben.");
 
-let allSongs = [];
-let currentPairs = [];
-let nextRound = [];
-let round = 1;
-let currentIndex = 0;
+  const response = await fetch("http://localhost:8000/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ song })
+  });
 
-form.addEventListener('submit', function (e) {
-  e.preventDefault();
-  const inputs = document.querySelectorAll('#inputs input');
-  allSongs = Array.from(inputs)
-    .map((i) => convertSpotifyLink(i.value));
+  const data = await response.json();
+  localStorage.setItem("player_id", data.player_id);
 
-  allSongs = shuffle(allSongs);
-  startBattle();
-});
+  document.getElementById("submit-section").style.display = "none";
+  document.getElementById("ready-section").style.display = "block";
+};
 
-function convertYouTubeLink(url) {
-  const match = url.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-  );
-  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
-}
+readyBtn.onclick = async () => {
+  const player_id = localStorage.getItem("player_id");
+  if (!player_id) return alert("Kein Spieler-ID gefunden!");
 
-function convertSpotifyLink(url) {
-  return `https://open.spotify.com/embed/track/${url}`
-}
+  const response = await fetch("http://localhost:8000/ready", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ player_id })
+  });
 
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
+  const data = await response.json();
 
-function startBattle() {
-  form.style.display = 'none';
-  document.getElementById('battle').style.display = 'block';
-  currentPairs = allSongs;
-  round = 1;
-  currentIndex = 0;
-  nextRound = [];
-  document.getElementById('round-number').textContent = round;
-  showNextBattle();
-}
-
-function showNextBattle() {
-    if (currentIndex >= currentPairs.length) {
-      if (nextRound.length === 1) {
-        document.querySelector('#battle').innerHTML = `
-          <h2>🏆 Der Gewinner ist:</h2>
-          <iframe width="560" height="315" src="${nextRound[0]}" frameborder="0" allowfullscreen></iframe>
-        `;
-        return;
-      }
-      currentPairs = nextRound;
-      nextRound = [];
-      currentIndex = 0;
-      round++;
-      document.getElementById('round-number').textContent = round;
-    }
-  
-    const song1 = currentPairs[currentIndex];
-    const song2 = currentPairs[currentIndex + 1];
-  
-    document.getElementById('song1').src = song1;
-    document.getElementById('song2').src = song2;
-  
-    document.querySelectorAll('.vote').forEach((btn, idx) => {
-      btn.onclick = () => {
-        nextRound.push(idx === 0 ? song1 : song2);
-        currentIndex += 2;
-        showNextBattle();
-      };
-    });
+  if (data.status === "start") {
+    alert("🎮 Das Spiel beginnt!");
+    console.log("Songs im Spiel:", data.songs);
+    // Optional: Weiterleitung auf andere Seite
+    // window.location.href = "/game.html";
+  } else {
+    alert("Warte auf weitere Spieler...");
   }
-  
+};
+
+// Status regelmäßig abrufen
+setInterval(fetchStatus, 5000);
+
+async function fetchStatus() {
+  try {
+    const res = await fetch("http://localhost:8000/status");
+    const data = await res.json();
+
+    document.getElementById("num-submitted").textContent = data.num_submitted;
+    document.getElementById("num-ready").textContent = data.num_ready;
+    document.getElementById("game-ready").textContent = data.game_ready ? "Ja" : "Nein";
+  } catch (err) {
+    console.error("Fehler beim Status-Abrufen:", err);
+  }
+}
