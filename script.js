@@ -1,16 +1,32 @@
 const submitBtn = document.getElementById("submit-btn");
 const readyBtn = document.getElementById("ready-btn");
 
+// 🆕 Funktion: Track-ID aus Spotify-URL extrahieren
+function extractSpotifyTrackId(url) {
+  const match = url.match(/track\/([a-zA-Z0-9]+)(\?|$)/);
+  if (!match) {
+    throw new Error("Ungültiger Spotify-Link");
+  }
+  return match[1];
+}
+
 // Song einreichen
 submitBtn.onclick = async () => {
-  const song = document.getElementById("song-input").value.trim();
-  if (!song) return alert("Bitte einen Spotify-Link eingeben.");
+  const input = document.getElementById("song-input").value.trim();
+  if (!input) return alert("Bitte einen Spotify-Link eingeben.");
+
+  let trackId;
+  try {
+    trackId = extractSpotifyTrackId(input);
+  } catch (e) {
+    return alert("❌ Ungültiger Spotify-Track-Link.");
+  }
 
   try {
     const response = await fetch("http://localhost:8000/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ song })
+      body: JSON.stringify({ song: trackId }) // ⬅️ Nur die Track-ID senden
     });
 
     if (!response.ok) {

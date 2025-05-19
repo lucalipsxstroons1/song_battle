@@ -2,20 +2,50 @@ let allSongs = []; // enthält alle Spotify-Embed-Links
 let round = 1;
 let currentIndex = 0;
 let nextRound = [];
+let timerInterval;
 
 window.onload = async () => {
-  // Hol dir Songs vom Server oder aus localStorage
-  const response = await fetch("http://localhost:8000/getcur");
-  const songIds = await response.json();
+  try {
+    const response = await fetch("http://localhost:8000/getcur");
+    if (!response.ok) throw new Error("Songs konnten nicht geladen werden.");
 
-  // Umwandeln in embed-Links
-  allSongs = songIds.map(id => `https://open.spotify.com/embed/track/${id}`);
+    const songIds = await response.json(); // ["f759060d84744845", "2765818cf77b4312"]
+    console.log("Erhaltene IDs:", songIds);
 
-  // Mischen
-  allSongs = shuffle(allSongs);
+    // IDs direkt in Embed-URLs einfügen
+    allSongs = songIds.map(id => `https://open.spotify.com/embed/track/${id}`);
 
-  showNextBattle();
+    document.getElementById("battle-container").style.display = "block";
+    showNextBattle(); // Songs anzeigen und Countdown starten
+  } catch (err) {
+    alert("Fehler beim Laden der Songs!");
+    console.error(err);
+  }
 };
+
+
+function startTimer(duration, displayEl) {
+  clearInterval(timerInterval); // Vorherigen Timer stoppen
+
+  let time = duration;
+  displayEl.textContent = `⏳ ${time}s`;
+
+  timerInterval = setInterval(() => {
+    time--;
+    displayEl.textContent = `⏳ ${time}s`;
+
+    if (time <= 0) {
+      clearInterval(timerInterval);
+      displayEl.textContent = "🛑 Zeit abgelaufen!";
+      disableVoting();
+    }
+  }, 1000);
+}
+
+function disableVoting() {
+  const buttons = document.querySelectorAll("button.glow-on-hover");
+  buttons.forEach(btn => btn.disabled = true);
+}
 
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
@@ -42,6 +72,14 @@ function showNextBattle() {
 
   document.getElementById("iframe1").src = song1;
   document.getElementById("iframe2").src = song2;
+
+  enableVoting(); // Neue Runde → Buttons wieder aktivieren
+  startTimer(60, document.getElementById("timer")); // Countdown starten
+}
+
+function enableVoting() {
+  const buttons = document.querySelectorAll("button.glow-on-hover");
+  buttons.forEach(btn => btn.disabled = false);
 }
 
 function vote(index) {
