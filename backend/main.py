@@ -18,7 +18,7 @@ ready_players: Set[uuid.UUID] = set()
 players = []
 
 # Anzahl benötigter Spieler
-required_players = 4
+required_players = 2
 
 class Cur_Song():
     def __init__(self, id):
