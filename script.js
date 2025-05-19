@@ -32,30 +32,45 @@ submitBtn.onclick = async () => {
 // Als bereit markieren
 readyBtn.onclick = async () => {
   const player_id = localStorage.getItem("player_id");
-  if (!player_id) return alert("Kein Spieler-ID gefunden!");
+  if (!player_id) return alert("❗ Kein Spieler-ID gefunden!");
 
   try {
     const response = await fetch(`http://localhost:8000/ready?id=${player_id}`);
+    const data = await response.json();
+
     if (!response.ok) {
-      const err = await response.json();
-      return alert(`Fehler: ${err.detail}`);
+      return alert(`Fehler: ${data.detail}`);
     }
 
-    const data = await response.json();
     if (data.status === "start") {
       alert("🎮 Das Spiel beginnt!");
       window.location.href = "battle/battle.html";
     } else {
-      alert("Du bist bereit – warte auf andere Spieler...");
+      alert("✅ Du bist bereit – warte auf andere Spieler...");
+      startPollingForStart();
     }
   } catch (err) {
-    alert("Fehler beim Ready-Melden");
+    alert("⚠️ Fehler beim Ready-Melden");
     console.error(err);
   }
 };
 
-// Spielstatus regelmäßig abfragen
-setInterval(fetchStatus, 3000);
+function startPollingForStart() {
+  const intervalId = setInterval(async () => {
+    try {
+      const response = await fetch("http://localhost:8000/status");
+      const data = await response.json();
+
+      if (data.status === 1) {
+        clearInterval(intervalId); // Stop polling
+        alert("🎮 Das Spiel beginnt!");
+        window.location.href = "battle/battle.html";
+      }
+    } catch (err) {
+      console.error("Polling-Fehler:", err);
+    }
+  }, 2000); // Alle 2 Sekunden prüfen
+}
 
 async function fetchStatus() {
   try {
