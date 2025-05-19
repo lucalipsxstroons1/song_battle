@@ -32,8 +32,9 @@ class Cur_Song():
     def __init__(self, id, submitter):
         self.submitter = submitter
         self.id = id
+        self.votes = set()
 
-    votes: Set[uuid.UUID] = set()
+    votes: Set[uuid.UUID]
     id: str
     submitter: uuid.UUID
 
@@ -123,16 +124,11 @@ def start():
     cur_songs = [submitted_songs[0], submitted_songs[1]]
 
 def vote(player: uuid.UUID, song: str):
-    print(song)
+    global cur_songs
 
     for cur_song in cur_songs:
-        print(id(cur_song), cur_song.id)
-
         if cur_song.id == song:
             cur_song.votes.add(player)
             print(player, "voted for song:", cur_song.id)
-
-            for cur_song in cur_songs:
-                print(cur_song.votes)
 
             return len(cur_song.votes)
