@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Set
 from fastapi.responses import JSONResponse
@@ -7,16 +7,18 @@ import random
 
 app = FastAPI()
 
+# 1 = Runnging, 0 = Waiting
+status = 0
+
 # Spieler-ID → Song-ID
-submitted_songs: Dict[str, str] = {}
+submitted_songs: Dict[uuid.UUID, str] = {}
 
 # Spieler-ID (die sich als ready gemeldet haben)
-ready_players: Set[str] = set()
+ready_players: Set[uuid.UUID] = set()
+players = []
 
 # Anzahl benötigter Spieler
 required_players = 4
-songs = []
-players = []
 
 # ==== Datenmodelle ====
 
@@ -25,8 +27,11 @@ class Song(BaseModel):
 
 @app.post("/submit")
 async def submit(song: Song):
+    if status == 1:
+        raise HTTPException(status_code=403, detail="Game already started")
+
     # UUID für Spieler erzeugen
-    player_id = str(uuid.uuid4())
+    player_id = uuid.uuid4()
 
     # Song speichern
     submitted_songs[player_id] = song.song
@@ -34,10 +39,7 @@ async def submit(song: Song):
 
     print(f"Spieler {player_id} hat Song {song.song} eingereicht")
 
-    return {"player_id": player_id, "status": "submitted"}
-
-class Ready(BaseModel):
-    player_id: str
+    return { "player_id": player_id }
 
 @app.get("/getcur")
 async def getcur():
@@ -45,32 +47,24 @@ async def getcur():
 
 @app.get("/status")
 async def status():
+    return { "status": status }
 
+@app.get("/ready")
+async def ready(id: str):
+    if status == 1:
+        raise HTTPException(status_code=403, detail="Game already started")
 
-@app.post("/ready")
-async def ready(ready: Ready):
-    ready_players.add(ready.player_id)
+    playerid = uuid.UUID(id)
+    ready_players.add(playerid)
 
     # Spiel starten wenn alle Spieler bereit & eingereicht haben
     if len(ready_players) >= required_players and len(submitted_songs) >= required_players:
-        return JSONResponse(
-            content={
-                "status": "start",
-                "songs": list(submitted_songs.values())
-            }
-        )
+        start()
+        return { "status": "start" }
 
-    return {"status": "waiting", "ready": len(ready_players)}
+    return {"status": "waiting" }
 
-@app.post("/submit")
-async def submit(song: Song):
-    # Adds song
-    songs.append(song.song)
-    print(song.song, "added")
-
-    # Adds Player
-    playeruuid = uuid.uuid4()
-    players.append((uuid, False))
-    print("Player added, uuid:", uuid)
-
-    return str(playeruuid)
+def start():
+    status = 1
+    random.shuffle(submitted_songs)
+    return
