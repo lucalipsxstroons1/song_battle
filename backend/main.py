@@ -49,6 +49,9 @@ async def post_submit(song: Song):
 
 @app.get("/getcur")
 async def get_cur():
+    if len(cur_songs) < 2:
+        raise HTTPException(status_code=403, detail="No currents songs at the moment")
+
     return [ cur_songs[0].id, cur_songs[1].id ]
 
 @app.get("/status")
@@ -64,7 +67,7 @@ async def get_ready(id: str):
     ready_players.add(playerid)
 
     # Spiel starten wenn alle Spieler bereit & eingereicht haben
-    if len(ready_players) >= required_players and len(submitted_songs) >= required_players:
+    if len(ready_players) >= required_players and len(ready_players) == len(players):
         start()
         return { "status": "start" }
 
