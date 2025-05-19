@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🎵 Song Battle (YouTube)</title>
+  <title>🎵 Song Battle (Spotify)</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <form id="song-form">
-      <h1>🎶 Song Battle (YouTube)</h1>
-      <p>Füge 16 YouTube-Links ein</p>
+      <h1>🎶 Song Battle (Spotify)</h1>
+      <p>Füge 16 Spotify-Links ein</p>
       <div id="inputs"></div>
       <button type="submit">Start Battle</button>
-    </form>
+    </form> 
 
     <div id="battle" style="display: none;">
       <h2>Runde <span id="round-number">1</span></h2>
       <div class="battle-container">
-        <div class="song">
-          <iframe id="song1" width="100%" height="200" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        <div class="song" id="song1">
+          <iframe width="100%" height="200" frameborder="0" allowfullscreen></iframe>
           <button class="vote">Wähle diesen Song</button>
         </div>
-        <div class="song" >
-          <iframe id="song2" width="100%" height="200" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        <div class="song" id="song2">
+          <iframe width="100%" height="200" frameborder="0" allowfullscreen></iframe>
           <button class="vote">Wähle diesen Song</button>
         </div>
       </div>
