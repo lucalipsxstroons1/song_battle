@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Dict, Set
 from fastapi.responses import JSONResponse
 import uuid
+import random
 
 app = FastAPI()
 
@@ -14,9 +15,8 @@ ready_players: Set[str] = set()
 
 # Anzahl benötigter Spieler
 required_players = 4
-
-# Registrierte Spieler (optional)
-players: Set[str] = set()
+songs = []
+players = []
 
 # ==== Datenmodelle ====
 
@@ -39,6 +39,14 @@ async def submit(song: Song):
 class Ready(BaseModel):
     player_id: str
 
+@app.get("/getcur")
+async def getcur():
+    return ["51GmZjHgR1sWkHWqpQzpEa", "3cLXgIlvugVKpWBmO5v9oy"]
+
+@app.get("/status")
+async def status():
+
+
 @app.post("/ready")
 async def ready(ready: Ready):
     ready_players.add(ready.player_id)
@@ -54,20 +62,15 @@ async def ready(ready: Ready):
 
     return {"status": "waiting", "ready": len(ready_players)}
 
-@app.get("/status")
-async def status():
-    return {
-        "submitted_songs": submitted_songs,
-        "ready_players": list(ready_players),
-        "num_ready": len(ready_players),
-        "num_submitted": len(submitted_songs),
-        "required_players": required_players,
-        "game_ready": len(ready_players) >= required_players and len(submitted_songs) >= required_players
-    }
+@app.post("/submit")
+async def submit(song: Song):
+    # Adds song
+    songs.append(song.song)
+    print(song.song, "added")
 
-@app.get("/reset")
-async def reset():
-    submitted_songs.clear()
-    ready_players.clear()
-    players.clear()
-    return {"status": "reset"}
+    # Adds Player
+    playeruuid = uuid.uuid4()
+    players.append((uuid, False))
+    print("Player added, uuid:", uuid)
+
+    return str(playeruuid)
