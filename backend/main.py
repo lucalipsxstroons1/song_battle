@@ -1,9 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Set
 from fastapi.middleware.cors import CORSMiddleware
+import battle
 import uuid
-import random
 
 app = FastAPI()
 
@@ -15,39 +14,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1 = Runnging, 0 = Waiting
-status = 0
-
-submitted_songs = []
-cur_songs = []
-
-# Spieler-ID (die sich als ready gemeldet haben)
-ready_players: Set[uuid.UUID] = set()
-players = []
-
-# Anzahl benötigter Spieler
-required_players = 2
-
-class Cur_Song():
-    def __init__(self, id, submitter):
-        self.submitter = submitter
-        self.id = id
-        self.votes = set()
-
-    votes: Set[uuid.UUID]
-    id: str
-    submitter: uuid.UUID
-
 class Song(BaseModel):
     song: str
 
 @app.post("/submit")
 async def post_submit(song: Song):
-    if status == 1:
+    if battle.status == 1:
         raise HTTPException(status_code=403, detail="Game already started")
     
     # Prüfen auf doppelte Songs
-    for entry in submitted_songs:
+    for entry in battle.submitted_songs:
         if entry.id.lower() == song.song.lower():
             raise HTTPException(
                 status_code=400,
@@ -58,8 +34,8 @@ async def post_submit(song: Song):
     player_id = uuid.uuid4()
 
     # Song speichern
-    submitted_songs.append(Cur_Song(song.song, player_id))
-    players.append(player_id)
+    battle.submitted_songs.append(battle.Cur_Song(song.song, player_id))
+    battle.players.add(player_id)
 
     print(f"Spieler {player_id} hat Song {song.song} eingereicht")
 
@@ -67,68 +43,52 @@ async def post_submit(song: Song):
 
 @app.get("/getcur")
 async def get_cur():
-    if len(cur_songs) < 2:
+    if len(battle.cur_songs) < 2:
         raise HTTPException(status_code=403, detail="No currents songs at the moment")
 
-    return [ cur_songs[0].id, cur_songs[1].id ]
+    return [ battle.cur_songs[0].id, battle.cur_songs[1].id ]
 
 @app.get("/status")
 async def get_status():
-    return { "status": status }
+    return { "status": battle.status }
 
 @app.get("/ready")
 async def get_ready(id: str):
-    if status == 1:
+    if battle.status == 1:
         raise HTTPException(status_code=403, detail="Game already started")
 
     playerid = uuid.UUID(id)
 
-    if not playerid in players:
+    if not playerid in battle.players:
         raise HTTPException(status_code=403, detail="Not a valid player")
         
-    ready_players.add(playerid)
+    battle.ready_players.add(playerid)
 
     # Spiel starten wenn alle Spieler bereit & eingereicht haben
-    if len(ready_players) >= required_players and len(ready_players) == len(players):
-        start()
+    if (
+        len(battle.ready_players) >= battle.REQUIRED_PLAYERS and 
+        len(battle.ready_players) == len(battle.players)
+    ):
+        battle.start()
         return { "status": "start" }
 
     return {"status": "waiting" }
 
 @app.post("/vote")
 async def post_vote(song: Song, player_uuid: str):
-    if status == 0:
+    if battle.status == 0:
         raise HTTPException(status_code=403, detail="Game not started")
 
     playerid = uuid.UUID(player_uuid)
 
-    if not playerid in ready_players:
+    if not playerid in battle.ready_players:
         raise HTTPException(status_code=403, detail="Not a valid player")
 
-    return vote(playerid, song.song)
+    return battle.vote(playerid, song.song)
 
 @app.get("/votes")
 async def get_votes():
     return { 
-        cur_songs[0].id: len(cur_songs[0].votes),
-        cur_songs[1].id: len(cur_songs[1].votes),
+        battle.cur_songs[0].id: len(battle.cur_songs[0].votes),
+        battle.cur_songs[1].id: len(battle.cur_songs[1].votes),
         }
-
-def start():
-    global status
-    global cur_songs
-    assert status == 0
-
-    status = 1
-    random.shuffle(submitted_songs)
-    cur_songs = [submitted_songs[0], submitted_songs[1]]
-
-def vote(player: uuid.UUID, song: str):
-    global cur_songs
-
-    for cur_song in cur_songs:
-        if cur_song.id == song:
-            cur_song.votes.add(player)
-            print(player, "voted for song:", cur_song.id)
-
-            return len(cur_song.votes)
