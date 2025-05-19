@@ -1,7 +1,7 @@
 const form = document.getElementById('song-form');
 const inputsDiv = document.getElementById('inputs');
 
-for (let i = 0; i < 16; i++) {
+for (let i = 0; i < 5; i++) {
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = `Song ${i + 1} (YouTube-Link)`;
@@ -19,13 +19,7 @@ form.addEventListener('submit', function (e) {
   e.preventDefault();
   const inputs = document.querySelectorAll('#inputs input');
   allSongs = Array.from(inputs)
-    .map((i) => convertYouTubeLink(i.value))
-    .filter(Boolean);
-
-  if (allSongs.length !== 16) {
-    alert("Bitte 16 gültige YouTube-Links eingeben.");
-    return;
-  }
+    .map((i) => convertSpotifyLink(i.value));
 
   allSongs = shuffle(allSongs);
   startBattle();
@@ -36,6 +30,10 @@ function convertYouTubeLink(url) {
     /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
   );
   return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+function convertSpotifyLink(url) {
+  return `https://open.spotify.com/embed/track/${url}`
 }
 
 function shuffle(array) {
