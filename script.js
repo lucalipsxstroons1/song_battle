@@ -4,7 +4,7 @@ const inputsDiv = document.getElementById('inputs');
 for (let i = 0; i < 5; i++) {
   const input = document.createElement('input');
   input.type = 'text';
-  input.placeholder = `Song ${i + 1} (YouTube-Link)`;
+  input.placeholder = `Song ${i + 1} (Spotify-Link)`;
   input.required = true;
   inputsDiv.appendChild(input);
 }
@@ -70,15 +70,8 @@ function showNextBattle() {
     const song1 = currentPairs[currentIndex];
     const song2 = currentPairs[currentIndex + 1];
   
-    document.getElementById('song1').innerHTML = `
-      <iframe width="100%" height="200" src="${song1}" frameborder="0" allowfullscreen></iframe>
-      <button class="vote">Wähle diesen Song</button>
-    `;
-  
-    document.getElementById('song2').innerHTML = `
-      <iframe width="100%" height="200" src="${song2}" frameborder="0" allowfullscreen></iframe>
-      <button class="vote">Wähle diesen Song</button>
-    `;
+    document.getElementById('song1').src = song1;
+    document.getElementById('song2').src = song2;
   
     document.querySelectorAll('.vote').forEach((btn, idx) => {
       btn.onclick = () => {
