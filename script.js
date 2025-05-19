@@ -1,13 +1,24 @@
+const form = document.getElementById('song-form');
+const inputsDiv = document.getElementById('inputs');
+
+for (let i = 0; i < 16; i++) {
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = `Song ${i + 1} (URL oder Pfad)`;
+  input.required = true;
+  inputsDiv.appendChild(input);
+}
+
 let allSongs = [];
 let currentPairs = [];
 let nextRound = [];
 let round = 1;
 let currentIndex = 0;
 
-form.addEventListener('submit', function(e) {
+form.addEventListener('submit', function (e) {
   e.preventDefault();
   const inputs = document.querySelectorAll('#inputs input');
-  allSongs = Array.from(inputs).map(i => i.value);
+  allSongs = Array.from(inputs).map((i) => i.value);
   allSongs = shuffle(allSongs);
   startBattle();
 });
@@ -30,7 +41,11 @@ function startBattle() {
 function showNextBattle() {
   if (currentIndex >= currentPairs.length) {
     if (nextRound.length === 1) {
-      alert("Der Gewinner ist: " + nextRound[0]);
+      document.querySelector('#battle').innerHTML = `
+        <h2>🏆 Der Gewinner ist:</h2>
+        <p>${nextRound[0]}</p>
+        <audio controls src="${nextRound[0]}" autoplay></audio>
+      `;
       return;
     }
     currentPairs = nextRound;
@@ -42,6 +57,7 @@ function showNextBattle() {
 
   const song1 = currentPairs[currentIndex];
   const song2 = currentPairs[currentIndex + 1];
+
   document.querySelector('#song1 audio').src = song1;
   document.querySelector('#song2 audio').src = song2;
 

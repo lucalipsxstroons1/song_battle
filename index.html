@@ -1,6 +1,35 @@
-<form id="song-form">
-    <h3>Song Battle – Trage 16 Songs ein</h3>
-    <div id="inputs"></div>
-    <button type="submit">Start Battle</button>
-  </form>
-  
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎵 Song Battle</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <form id="song-form">
+      <h1>🎶 Song Battle</h1>
+      <p>Gib 16 Audio-URLs oder lokale Pfade ein</p>
+      <div id="inputs"></div>
+      <button type="submit">Start Battle</button>
+    </form>
+
+    <div id="battle" style="display: none;">
+      <h2>Runde <span id="round-number">1</span></h2>
+      <div class="battle-container">
+        <div class="song" id="song1">
+          <audio controls></audio>
+          <button class="vote">Wähle diesen Song</button>
+        </div>
+        <div class="song" id="song2">
+          <audio controls></audio>
+          <button class="vote">Wähle diesen Song</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
