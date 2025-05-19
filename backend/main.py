@@ -126,12 +126,13 @@ def vote(player: uuid.UUID, song: str):
     print(song)
 
     for cur_song in cur_songs:
-        print(cur_song.id)
+        print(id(cur_song), cur_song.id)
+
         if cur_song.id == song:
             cur_song.votes.add(player)
             print(player, "voted for song:", cur_song.id)
 
             for cur_song in cur_songs:
-                print(len(cur_song.votes))
+                print(cur_song.votes)
 
             return len(cur_song.votes)
