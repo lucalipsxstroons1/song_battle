@@ -102,6 +102,9 @@ async function loadNextBattle() {
   }
 }
 
+// 🟢 Jetzt: Progress anzeigen NACH erfolgreichem Vote
+setInterval(updateVoteProgress, 500); // Optional leichter Delay
+
 async function vote(index) {
   const iframe1 = document.getElementById("iframe1").src;
   const iframe2 = document.getElementById("iframe2").src;
@@ -136,8 +139,6 @@ async function vote(index) {
       btn.style.backgroundColor = i === index ? "#4CAF50" : "#ccc";
     });
 
-    // 🟢 Jetzt: Progress anzeigen NACH erfolgreichem Vote
-    setTimeout(updateVoteProgress, 100); // Optional leichter Delay
 
   } catch (err) {
     console.error("Fehler beim Voten:", err);
