@@ -20,9 +20,7 @@ function connectWebSocket() {
       if (data.timer === 0) {
         disableVoting();
         document.getElementById("timer").textContent = "🛑 Zeit abgelaufen!";
-        
-        // Starte nächste Runde automatisch
-        setTimeout(() => loadNextBattle(), 1500); // Kurze Pause zum Anzeigen "Zeit abgelaufen"
+        setTimeout(() => loadNextBattle(), 1500); // Nächste Runde
       }
     }
   };
@@ -82,7 +80,11 @@ async function loadNextBattle() {
     document.getElementById("iframe2").src = `https://open.spotify.com/embed/track/${song2}`;
 
     enableVoting();
-    ws.send("start");
+    if (ws.readyState === 1) {
+      ws.send("start");
+    } else {
+      console.warn("WebSocket nicht bereit!");
+    }    
   } catch (err) {
     console.warn("Turnier vorbei oder Fehler:", err);
     const winnerRes = await fetch(`http://${window.location.hostname}:8000/winner`);
@@ -101,7 +103,6 @@ async function vote(index) {
 
   const trackId1 = extractTrackIdFromEmbed(iframe1);
   const trackId2 = extractTrackIdFromEmbed(iframe2);
-
   const trackId = index === 0 ? trackId1 : trackId2;
 
   if (!playerId) {
@@ -116,8 +117,6 @@ async function vote(index) {
       body: JSON.stringify({ song: trackId }),
     });
 
-    await updateVoteProgress();
-
     if (!res.ok) {
       const err = await res.json();
       alert(`Fehler beim Voten: ${err.detail}`);
@@ -126,16 +125,21 @@ async function vote(index) {
 
     console.log("Vote erfolgreich:", trackId);
     disableVoting();
+
     document.querySelectorAll("button.glow-on-hover").forEach((btn, i) => {
       btn.textContent = i === index ? "✅ Deine Stimme" : "❌";
       btn.style.backgroundColor = i === index ? "#4CAF50" : "#ccc";
     });
+
+    // 🟢 Jetzt: Progress anzeigen NACH erfolgreichem Vote
+    setTimeout(updateVoteProgress, 100); // Optional leichter Delay
 
   } catch (err) {
     console.error("Fehler beim Voten:", err);
     alert("Netzwerkfehler beim Voten.");
   }
 }
+
 
 function extractTrackIdFromEmbed(embedUrl) {
   const parts = embedUrl.split("/track/");
@@ -150,7 +154,7 @@ function showWinner(embedUrl) {
 }
 
 function goToStart() {
-  window.location.href = "/index.html";
+  window.location.href = "/../index.html";
 }
 
 function restartGame() {
@@ -160,7 +164,7 @@ function restartGame() {
   }).then(res => {
     if (res.ok) {
       alert("🔁 Spiel wurde zurückgesetzt.");
-      window.location.href = "/battle/battle.html"; // Direkt neues Spiel
+      window.location.href = "/battle/battle.html";
     } else {
       alert("⚠️ Fehler beim Zurücksetzen des Spiels.");
     }
