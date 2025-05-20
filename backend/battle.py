@@ -1,7 +1,7 @@
 import uuid
 import random
 
-REQUIRED_PLAYERS: int = 2
+REQUIRED_PLAYERS: int = 4
 
 class Cur_Song():
     def __init__(self, id, submitter):
