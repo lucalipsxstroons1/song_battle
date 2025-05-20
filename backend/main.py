@@ -31,16 +31,7 @@ async def post_submit(song: Song):
                 detail="Song wurde bereits eingereicht. Bitte wähle einen anderen Song."
             )
 
-    # UUID für Spieler erzeugen
-    player_id = uuid.uuid4()
-
-    # Song speichern
-    battle.submitted_songs.append(battle.Cur_Song(song.song, player_id))
-    battle.players.add(player_id)
-
-    print(f"Spieler {player_id} hat Song {song.song} eingereicht")
-
-    return { "player_id": player_id }
+    return { "player_id": battle.submit(song) }
 
 @app.get("/getcur")
 async def get_cur():
@@ -63,17 +54,7 @@ async def get_ready(id: str):
     if not playerid in battle.players:
         raise HTTPException(status_code=403, detail="Not a valid player")
         
-    battle.ready_players.add(playerid)
-
-    # Spiel starten wenn alle Spieler bereit & eingereicht haben
-    if (
-        len(battle.ready_players) >= battle.REQUIRED_PLAYERS and 
-        len(battle.ready_players) == len(battle.players)
-    ):
-        battle.start()
-        return { "status": "start" }
-
-    return {"status": "waiting" }
+    return {"status": "start" if battle.ready(playerid) else "waiting" }
 
 @app.post("/vote")
 async def post_vote(song: Song, player_uuid: str):
@@ -99,7 +80,7 @@ async def get_votes():
 
 
 
-clients: List[WebSocket] = []
+clients: list[WebSocket] = []
 
 # Timer-Variablen
 TIMER_DURATION = 60  # Sekunden
