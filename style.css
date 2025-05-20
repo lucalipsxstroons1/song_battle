@@ -168,3 +168,16 @@ button {
   50% { transform: scale(1.3); opacity: 1; }
   100% { transform: scale(1); }
 }
+
+.glow-on-hover-main {
+  width: 220px;
+  height: 50px;
+  border: none;
+  outline: none;
+  color: #fff;
+  background: #111;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 10px;
+}
