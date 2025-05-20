@@ -17,14 +17,18 @@ function connectWebSocket() {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+
       if (data.timer !== undefined) {
         updateTimerDisplay(data.timer);
+        updateVote(data.votes, data.total_players)
+
         if (data.timer === 0) {
           disableVoting();
           document.getElementById("timer").textContent = "🛑 Zeit abgelaufen!";
           setTimeout(() => loadNextBattle(), 1500);
         }
       }
+
     };
 
     ws.onclose = () => {
@@ -40,6 +44,8 @@ function updateTimerDisplay(seconds) {
   el.textContent = `⏳ ${seconds}s`;
 }
 
+updateVoteProgress()
+
 async function updateVoteProgress() {
   try {
     const res = await fetch(`http://${window.location.hostname}:8000/votes`);
@@ -49,15 +55,19 @@ async function updateVoteProgress() {
     const totalVotes = Object.values(data.votes).reduce((a, b) => a + b, 0);
     const totalPlayers = data.total;
 
-    const percent = (totalVotes / totalPlayers) * 100;
-
-    document.getElementById("vote-status-text").textContent =
-      `🗳 ${totalVotes} von ${totalPlayers} Stimmen`;
-
-    document.getElementById("vote-bar").style.width = `${percent}%`;
+    updateVote(totalVotes, totalPlayers);
   } catch (err) {
     console.error("Fehler beim Abrufen der Stimmen:", err);
   }
+}
+
+function updateVote(votes, totalPlayers) {
+    const percent = (votes / totalPlayers) * 100;
+
+    document.getElementById("vote-status-text").textContent =
+      `🗳 ${votes} von ${totalPlayers} Stimmen`;
+
+    document.getElementById("vote-bar").style.width = `${percent}%`;
 }
 
 function disableVoting() {
@@ -103,7 +113,7 @@ async function loadNextBattle() {
 }
 
 // 🟢 Jetzt: Progress anzeigen NACH erfolgreichem Vote
-setInterval(updateVoteProgress, 500); // Optional leichter Delay
+// setInterval(updateVoteProgress, 500); // Optional leichter Delay
 
 async function vote(index) {
   const iframe1 = document.getElementById("iframe1").src;

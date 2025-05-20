@@ -112,7 +112,9 @@ async def broadcast_timer():
     disconnected = []
     for client in clients:
         try:
-            await client.send_json({"timer": timer_value})
+            votes = sum([len(cur_song.votes) for cur_song in battle.cur_songs])
+            total_players = len(battle.ready_players)
+            await client.send_json({ "timer": timer_value, "votes": votes, "total_players": total_players })
         except:
             disconnected.append(client)
 
