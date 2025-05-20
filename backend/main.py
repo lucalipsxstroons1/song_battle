@@ -85,8 +85,6 @@ async def get_winner():
 
     return battle.winner.id
 
-
-
 clients: list[WebSocket] = []
 
 # Timer-Variablen
