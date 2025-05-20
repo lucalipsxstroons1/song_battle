@@ -23,7 +23,7 @@ submitBtn.onclick = async () => {
   }
 
   try {
-    const response = await fetch("http://localhost:8000/submit", {
+    const response = await fetch(`http://${window.location.hostname}:8000/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ song: trackId }) // ⬅️ Nur die Track-ID senden
@@ -51,7 +51,7 @@ readyBtn.onclick = async () => {
   if (!player_id) return alert("❗ Kein Spieler-ID gefunden!");
 
   try {
-    const response = await fetch(`http://localhost:8000/ready?id=${player_id}`);
+    const response = await fetch(`http://${window.location.hostname}:8000/ready?id=${player_id}`);
     const data = await response.json();
 
     if (!response.ok) {
@@ -74,7 +74,7 @@ readyBtn.onclick = async () => {
 function startPollingForStart() {
   const intervalId = setInterval(async () => {
     try {
-      const response = await fetch("http://localhost:8000/status");
+      const response = await fetch(`http://${window.location.hostname}:8000/status`);
       const data = await response.json();
 
       if (data.status === 1) {
@@ -90,7 +90,7 @@ function startPollingForStart() {
 
 async function fetchStatus() {
   try {
-    const res = await fetch("http://localhost:8000/status");
+    const res = await fetch(`http://${window.location.hostname}:8000/status`);
     const data = await res.json();
 
     const statusText = data.status === 1 ? "Spiel läuft" : "Warten auf Start";

@@ -7,7 +7,7 @@ window.onload = async () => {
 };
 
 function connectWebSocket() {
-  ws = new WebSocket("ws://localhost:8000/ws/timer");
+  ws = new WebSocket(`ws://${window.location.hostname}:8000/ws/timer`);
 
   ws.onopen = () => {
     console.log("WebSocket verbunden");
@@ -40,7 +40,7 @@ function updateTimerDisplay(seconds) {
 
 async function updateVoteProgress() {
   try {
-    const res = await fetch("http://localhost:8000/votes");
+    const res = await fetch(`http://${window.location.hostname}:8000/votes`);
     if (!res.ok) return;
 
     const data = await res.json();
@@ -74,7 +74,7 @@ function enableVoting() {
 
 async function loadNextBattle() {
   try {
-    const response = await fetch("http://localhost:8000/getcur");
+    const response = await fetch(`http://${window.location.hostname}:8000/getcur`);
     if (!response.ok) throw new Error("Keine Songs verfügbar");
 
     const [song1, song2] = await response.json();
@@ -85,7 +85,7 @@ async function loadNextBattle() {
     ws.send("start");
   } catch (err) {
     console.warn("Turnier vorbei oder Fehler:", err);
-    const winnerRes = await fetch("http://localhost:8000/winner");
+    const winnerRes = await fetch(`http://${window.location.hostname}:8000/winner`);
     if (winnerRes.ok) {
       const data = await winnerRes.json();
       showWinner(`https://open.spotify.com/embed/track/${data}`);
@@ -110,7 +110,7 @@ async function vote(index) {
   }
 
   try {
-    const res = await fetch(`http://localhost:8000/vote?player_uuid=${playerId}`, {
+    const res = await fetch(`http://${window.location.hostname}:8000/vote?player_uuid=${playerId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ song: trackId }),
@@ -155,7 +155,7 @@ function goToStart() {
 
 function restartGame() {
   // Spieler-ID beibehalten, aber Spielstatus zurücksetzen
-  fetch("http://localhost:8000/reset", {
+  fetch(`http://${window.location.hostname}:8000/reset`, {
     method: "POST"
   }).then(res => {
     if (res.ok) {
