@@ -82,6 +82,13 @@ function enableVoting() {
   buttons.forEach(btn => btn.disabled = false);
 }
 
+function showWinner(song) {
+  document.querySelector(".battle-container").style.display = "none";
+  document.getElementById("round-label").style.display = "none";
+  document.getElementById("winner-section").style.display = "block";
+  document.getElementById("winner-iframe").src = song;
+}
+
 async function vote(index) {
   const chosen = allSongs[index + currentIndex]; // embed URL
   const trackId = extractTrackIdFromEmbed(chosen);
@@ -105,19 +112,30 @@ async function vote(index) {
     }
 
     console.log("Vote erfolgreich für:", trackId);
-    nextRound.push(chosen);
-    currentIndex += 2;
-    showNextBattle();
+
+    // Feedback sichtbar machen
+    disableVoting();
+    document.querySelectorAll("button.glow-on-hover").forEach((btn, i) => {
+      btn.textContent = i === index ? "✅ Deine Stimme" : "❌";
+      btn.style.backgroundColor = i === index ? "#4CAF50" : "#ccc";
+    });
+
+    // Automatisch nach 2s nächste Runde starten
+    setTimeout(() => {
+      nextRound.push(chosen);
+      currentIndex += 2;
+      showNextBattle();
+    }, 2000);
+
   } catch (err) {
     console.error("Vote-Fehler:", err);
     alert("Fehler beim Senden deiner Stimme.");
   }
 }
 
-
-function showWinner(song) {
-  document.querySelector(".battle-container").style.display = "none";
-  document.getElementById("round-label").style.display = "none";
-  document.getElementById("winner-section").style.display = "block";
-  document.getElementById("winner-iframe").src = song;
+function extractTrackIdFromEmbed(embedUrl) {
+  const parts = embedUrl.split("/track/");
+  if (parts.length < 2) return null;
+  return parts[1].split("?")[0];
 }
+
