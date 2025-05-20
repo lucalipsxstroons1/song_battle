@@ -133,11 +133,13 @@ async def websocket_endpoint(websocket: WebSocket):
             print("📥 WebSocket-Eingang:", data)
 
             if data == "start":
-                print("⏱ Neue Runde – Timer auf 60s")
-                timer_value = TIMER_DURATION
-
                 if not timer_running:
+                    print("⏱ Neue Runde – Timer auf 60s")
+                    timer_value = TIMER_DURATION
                     asyncio.create_task(timer_loop())
+                else:
+                    print("⏳ Timer läuft bereits – Ignoriere erneuten Start")
+
 
     except WebSocketDisconnect:
         print("❌ WebSocket getrennt")
