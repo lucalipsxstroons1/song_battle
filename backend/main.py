@@ -26,7 +26,7 @@ async def post_submit(song: Song):
     for entry in battle.submitted_songs:
         if entry.id.lower() == song.song.lower():
             raise HTTPException(
-                status_code=400,
+                status_code=403,
                 detail="Song wurde bereits eingereicht. Bitte wähle einen anderen Song."
             )
 
