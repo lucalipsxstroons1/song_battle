@@ -8,7 +8,7 @@ window.onload = async () => {
 
 function connectWebSocket() {
   return new Promise((resolve) => {
-    ws = new WebSocket("ws://localhost:8000/ws/timer");
+    ws = new WebSocket(`ws://${window.location.hostname}:8000/ws/timer`);
 
     ws.onopen = () => {
       console.log("WebSocket verbunden");
