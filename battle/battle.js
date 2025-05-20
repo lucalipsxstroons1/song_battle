@@ -7,6 +7,7 @@ let ws;
 
 window.onload = async () => {
   try {
+    connectWebSocket();
     const response = await fetch("http://localhost:8000/getcur");
     if (!response.ok) throw new Error("Songs konnten nicht geladen werden.");
 
@@ -31,7 +32,7 @@ function connectWebSocket() {
   ws.onopen = () => {
     console.log("WebSocket verbunden.");
     // Nur ein Spieler darf "start" senden – z. B. Moderator
-    // ws.send("start"); // ggf. nur bei Bedarf auslösen
+     // ggf. nur bei Bedarf auslösen
   };
 
   ws.onmessage = (event) => {
@@ -88,7 +89,7 @@ function showNextBattle() {
   document.getElementById("iframe2").src = song2;
 
   enableVoting(); // Neue Runde → Buttons wieder aktivieren
-  //startTimer(60, document.getElementById("timer")); // Countdown starten
+  ws.send("start"); // Countdown starten
 }
 
 function enableVoting() {
