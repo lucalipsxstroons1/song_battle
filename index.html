@@ -9,35 +9,50 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="title">🎶 Song-battle</h1>
+    <h1 class="title">🎶 Song-Battle</h1>
     <p><strong>Spielstatus:</strong> <span id="game-status">Lade...</span></p>
-    <p class="subtitle">Insert your Song and click ready when you are</p>
+    <p class="subtitle">Insert your song and click ready when you are</p>
 
+    <!-- 🎧 Eingabe -->
     <div class="input-wrapper" id="submit-section">
-      <input type="text" id="song-input" placeholder="Paste your Spotify URL here..." />
+      <input
+        type="text"
+        id="song-input"
+        placeholder="🎧 Paste your Spotify URL here..."
+      />
+      <button id="submit-btn" class="submit-btn">Submit</button>
     </div>
-    <div class="button-wrapper">
-      <button id="submit-btn" class="glow-on-hover" type="button">Submit your Song</button>
-    </div>
+    
+    
 
-    <div id="ready-section" style="display: none;">
+    <!-- ✅ Ready -->
+    <div id="ready-section" style="display: none; margin-top: 20px;">
       <button id="ready-btn">I'm Ready</button>
     </div>
 
+    <!-- 🧩 Status -->
     <div id="status">
       <p>🎵 Submitted Songs: <span id="num-submitted">0</span></p>
       <p>✅ Players Ready: <span id="num-ready">0</span></p>
       <p>🚀 Game Ready: <span id="game-ready">Nein</span></p>
     </div>
 
+    <!-- 🎧 Spotify Direktlink -->
     <div class="spotify-link">
       <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer">
-        <span class="spotify-text">🎧 Hier direkt Spotify öffnen →</span>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg" alt="Spotify" width="40" height="40" title="Open Spotify" />
+        <span class="spotify-text">🎧 Open Spotify →</span>
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg"
+          alt="Spotify"
+          width="40"
+          height="40"
+          title="Open Spotify"
+        />
       </a>
     </div>
   </div>
 
   <script src="script.js"></script>
 </body>
+
 </html>
