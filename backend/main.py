@@ -87,6 +87,8 @@ async def get_winner():
 
 
 
+from fastapi import WebSocket, WebSocketDisconnect
+
 clients: list[WebSocket] = []
 
 # Timer-Variablen
@@ -94,6 +96,7 @@ TIMER_DURATION = 60  # Sekunden
 timer_value = TIMER_DURATION
 timer_running = False
 
+# ⏱ Haupt-Timer-Loop
 async def timer_loop():
     global timer_value, timer_running
     timer_running = True
@@ -103,24 +106,45 @@ async def timer_loop():
         await broadcast_timer()
     timer_running = False
 
+# 🔁 Timer an alle Clients senden
 async def broadcast_timer():
+    disconnected = []
     for client in clients:
-        await client.send_json({"timer": timer_value})
+        try:
+            await client.send_json({"timer": timer_value})
+        except:
+            disconnected.append(client)
 
+    # Entferne fehlerhafte Clients
+    for client in disconnected:
+        clients.remove(client)
 
+# 🌐 WebSocket-Endpunkt
 @app.websocket("/ws/timer")
 async def websocket_endpoint(websocket: WebSocket):
+    global timer_value, timer_running
+
     await websocket.accept()
     clients.append(websocket)
+    print("🔌 WebSocket verbunden")
 
-    # Timer-Stand direkt senden
+    # Beim Beitritt sofort aktuellen Timer senden
     await websocket.send_json({"timer": timer_value})
 
     try:
         while True:
             data = await websocket.receive_text()
-            if data == "start" and not timer_running:
-                asyncio.create_task(timer_loop())
+
+            if data == "start":
+                print("⏱ Timer-Start-Anfrage erhalten")
+                timer_value = TIMER_DURATION  # Zurücksetzen
+
+                if not timer_running:
+                    asyncio.create_task(timer_loop())
+
     except WebSocketDisconnect:
-        clients.remove(websocket)
+        print("❌ WebSocket getrennt")
+        if websocket in clients:
+            clients.remove(websocket)
+
 

@@ -1,14 +1,22 @@
 # song_battle
-song-battle
 
-Backend-Server
+## Backend-Server
 
- python3 -m uvicorn backend.main:app --reload
+```bash
+# only local connections
+cd backend
+python3 -m uvicorn main:app --reload
 
-Frontend Server
+# can connect form any ip
+cd backend
+python3 -m uvicorn --host 0.0.0.0 main:app --reload
+```
 
- python -m http.server 7000
+## Frontend Server
 
+```bash
+python -m http.server 7000
+```
 
 
 https://chatgpt.com/share/682b04f6-2260-800c-8a1d-61a4444c9482

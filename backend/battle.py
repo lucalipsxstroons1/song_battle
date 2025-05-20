@@ -17,6 +17,7 @@ status: int = 0  # 2 = Ending, 1 = Runnging, 0 = Waiting
 round_num: int = 0
 submitted_songs: list[Cur_Song] = []
 cur_songs: list[Cur_Song] = []
+qualified: list[Cur_Song] = []
 ready_players: set[uuid.UUID] = set()
 players: set[uuid.UUID] = set()
 winner: Cur_Song
@@ -94,25 +95,36 @@ def next_stage():
 
         cur_song.votes.clear()
 
-    print(f"Winner for round {round}:", winner)
+    print(f"Winner for round {round_num}:", winner)
 
-    for cur_song in submitted_songs:
-        if cur_song in cur_songs and cur_song != winner:
-            print("Remove loser:", cur_song.id)
+    qualified.append(winner)
+
+    for cur_song in submitted_songs[:]:
+        if cur_song in cur_songs:
+            print("Remove song:", cur_song.id)
             submitted_songs.remove(cur_song)
 
     if len(submitted_songs) < 2:
-        print(winner.id, "won the game")
-        end(winner)
+        end_stage()
         return
 
     random.shuffle(submitted_songs)
     cur_songs = [submitted_songs[0], submitted_songs[1]]
     round_num += 1
 
-def end(win: Cur_Song):
-    global status, winner, cur_songs
+def end_stage():
+    global status, winner, cur_songs, submitted_songs, round_num
 
-    status = 2
-    winner = win
-    cur_songs = []
+    print(f"Round {round_num} has ended")
+
+    print(len(qualified))
+    if (len(qualified) == 1):
+        status = 2
+        winner = qualified[0]
+        cur_songs = []
+        return
+
+    submitted_songs = qualified[:]
+    qualified.clear()
+    cur_songs = [submitted_songs[0], submitted_songs[1]]
+    round_num += 1
