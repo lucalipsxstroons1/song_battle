@@ -2,34 +2,38 @@ let ws;
 let playerId = localStorage.getItem("player_id");
 
 window.onload = async () => {
-  connectWebSocket();
-  await loadNextBattle();
+  await connectWebSocket(); // ← auf Fertigstellung warten
+  await loadNextBattle();   // ← erst danach starten
 };
 
 function connectWebSocket() {
-  ws = new WebSocket(`ws://${window.location.hostname}:8000/ws/timer`);
+  return new Promise((resolve) => {
+    ws = new WebSocket("ws://localhost:8000/ws/timer");
 
-  ws.onopen = () => {
-    console.log("WebSocket verbunden");
-  };
+    ws.onopen = () => {
+      console.log("WebSocket verbunden");
+      resolve(); // ← Promise erfüllen
+    };
 
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.timer !== undefined) {
-      updateTimerDisplay(data.timer);
-      if (data.timer === 0) {
-        disableVoting();
-        document.getElementById("timer").textContent = "🛑 Zeit abgelaufen!";
-        setTimeout(() => loadNextBattle(), 1500); // Nächste Runde
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.timer !== undefined) {
+        updateTimerDisplay(data.timer);
+        if (data.timer === 0) {
+          disableVoting();
+          document.getElementById("timer").textContent = "🛑 Zeit abgelaufen!";
+          setTimeout(() => loadNextBattle(), 1500);
+        }
       }
-    }
-  };
+    };
 
-  ws.onclose = () => {
-    console.warn("WebSocket getrennt – reconnect in 2s");
-    setTimeout(connectWebSocket, 2000);
-  };
+    ws.onclose = () => {
+      console.warn("WebSocket getrennt – reconnect in 2s");
+      setTimeout(connectWebSocket, 2000);
+    };
+  });
 }
+
 
 function updateTimerDisplay(seconds) {
   const el = document.getElementById("timer");
@@ -80,11 +84,12 @@ async function loadNextBattle() {
     document.getElementById("iframe2").src = `https://open.spotify.com/embed/track/${song2}`;
 
     enableVoting();
-    if (ws.readyState === 1) {
+    if (ws.readyState === WebSocket.OPEN) {
       ws.send("start");
+      console.log("🛰️ start gesendet");
     } else {
-      console.warn("WebSocket nicht bereit!");
-    }    
+      console.warn("❗ WebSocket nicht bereit!");
+    }     
   } catch (err) {
     console.warn("Turnier vorbei oder Fehler:", err);
     const winnerRes = await fetch(`http://${window.location.hostname}:8000/winner`);

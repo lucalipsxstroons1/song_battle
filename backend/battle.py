@@ -67,8 +67,11 @@ def vote(player: uuid.UUID, song: str) -> int:
             if check_votes():
                 print("All players have voted")
                 next_stage()
+                return len(ready_players)
 
             return len(cur_song.votes)
+
+    return 0
 
 def check_votes() -> bool:
     for player in players:
