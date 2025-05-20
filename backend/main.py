@@ -31,7 +31,7 @@ async def post_submit(song: Song):
                 detail="Song wurde bereits eingereicht. Bitte wähle einen anderen Song."
             )
 
-    return { "player_id": battle.submit(song) }
+    return { "player_id": battle.submit(song.song) }
 
 @app.get("/getcur")
 async def get_cur():

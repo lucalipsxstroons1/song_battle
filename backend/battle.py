@@ -29,7 +29,7 @@ def submit(song: str) -> uuid.UUID:
     submitted_songs.append(Cur_Song(song, player_id))
     players.add(player_id)
 
-    print(f"Spieler {player_id} hat Song {song.song} eingereicht")
+    print(f"Spieler {player_id} hat Song {song} eingereicht")
 
     return player_id
 
