@@ -43,6 +43,7 @@ submitBtn.onclick = async () => {
     alert("Fehler beim Einreichen des Songs");
     console.error(err);
   }
+  updateLobbyStatus();
 };
 
 // Als bereit markieren
@@ -69,7 +70,24 @@ readyBtn.onclick = async () => {
     alert("⚠️ Fehler beim Ready-Melden");
     console.error(err);
   }
+  updateLobbyStatus();
 };
+
+async function updateLobbyStatus() {
+  try {
+    const res = await fetch(`http://${window.location.hostname}:8000/lobby-status`);
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    document.getElementById("num-submitted").textContent = data.submitted;
+    document.getElementById("num-ready").textContent = data.ready;
+    document.getElementById("game-ready").textContent = data.game_ready ? "Ja" : "Nein";
+  } catch (err) {
+    console.error("Fehler beim Abrufen des Lobby-Status:", err);
+  }
+}
+
 
 function startPollingForStart() {
   const intervalId = setInterval(async () => {

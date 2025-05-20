@@ -86,6 +86,19 @@ async def get_winner():
         raise HTTPException(status_code=403, detail="Game not ended")
     return battle.winner.id
 
+@app.get("/lobby-status")
+async def get_lobby_status():
+    return {
+        "submitted": len(battle.submitted_songs),
+        "ready": len(battle.ready_players),
+        "required": battle.REQUIRED_PLAYERS,
+        "game_ready": (
+            len(battle.ready_players) >= battle.REQUIRED_PLAYERS and 
+            len(battle.ready_players) == len(battle.players)
+        )
+    }
+
+
 # 🧩 WebSocket-Clientliste
 clients: list[WebSocket] = []
 
