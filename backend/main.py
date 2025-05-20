@@ -36,6 +36,7 @@ async def post_submit(song: Song):
     # Song speichern
     battle.submitted_songs.append(battle.Cur_Song(song.song, player_id))
     battle.players.add(player_id)
+    battle.ready_players.add(player_id) # TODO remove just for testing
 
     print(f"Spieler {player_id} hat Song {song.song} eingereicht")
 
@@ -88,6 +89,10 @@ async def post_vote(song: Song, player_uuid: str):
         raise HTTPException(status_code=403, detail="Player already voted")
 
     return battle.vote(playerid, song.song)
+
+@app.get("/round")
+async def get_round():
+    return battle.round_num
 
 @app.get("/votes")
 async def get_votes():

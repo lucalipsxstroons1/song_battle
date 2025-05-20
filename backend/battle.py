@@ -14,15 +14,14 @@ class Cur_Song():
     submitter: uuid.UUID
 
 status: int = 0  # 1 = Runnging, 0 = Waiting
+round_num: int = 0
 submitted_songs: list[Cur_Song] = []
 cur_songs: list[Cur_Song] = []
 ready_players: set[uuid.UUID] = set()
 players: set[uuid.UUID] = set()
 
 def start():
-    global cur_songs
-    global submitted_songs
-    global status
+    global cur_songs, submitted_songs, status
 
     assert status == 0
 
@@ -40,6 +39,7 @@ def vote(player: uuid.UUID, song: str) -> int:
 
             if check_votes():
                 print("All players have voted")
+                next_stage()
 
             return len(cur_song.votes)
 
@@ -51,4 +51,32 @@ def check_votes() -> bool:
     return True
 
 def check_player_voted(playerid: uuid.UUID) -> bool:
-    return not any(playerid in cur_song.votes for cur_song in cur_songs)
+    return any(playerid in cur_song.votes for cur_song in cur_songs)
+
+def next_stage():
+    global cur_songs, round_num
+    assert len(cur_songs) > 0
+
+    winner = cur_songs[0]
+    winner_votes = len(cur_songs[0].votes)
+
+    for cur_song in cur_songs[1::]:
+        if len(cur_song.votes) > winner_votes:
+            winner = cur_song
+            winner_votes = len(cur_song.votes)
+
+    print("Winner:", winner)
+
+    for cur_song in submitted_songs:
+        print(cur_song.id)
+        if cur_song in cur_songs and cur_song != winner:
+            print("Remove loser:", cur_song.id)
+            submitted_songs.remove(cur_song)
+            print(submitted_songs)
+
+    if len(submitted_songs) < 2:
+        print(winner.id, "won")
+        return
+
+    cur_songs = [submitted_songs[0], submitted_songs[1]]
+    round_num += 1
