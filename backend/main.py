@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -78,6 +77,13 @@ async def get_votes():
         battle.cur_songs[0].id: len(battle.cur_songs[0].votes),
         battle.cur_songs[1].id: len(battle.cur_songs[1].votes),
         }
+
+@app.get("/winner")
+async def get_winner():
+    if battle.status != 2:
+        raise HTTPException(status_code=403, detail="Game not ended")
+
+    return battle.winner.id
 
 
 

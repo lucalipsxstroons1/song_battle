@@ -13,12 +13,13 @@ class Cur_Song():
     id: str
     submitter: uuid.UUID
 
-status: int = 0  # 1 = Runnging, 0 = Waiting
+status: int = 0  # 2 = Ending, 1 = Runnging, 0 = Waiting
 round_num: int = 0
 submitted_songs: list[Cur_Song] = []
 cur_songs: list[Cur_Song] = []
 ready_players: set[uuid.UUID] = set()
 players: set[uuid.UUID] = set()
+winner: Cur_Song
 
 def submit(song: str) -> uuid.UUID:
     # UUID für Spieler erzeugen
@@ -102,8 +103,16 @@ def next_stage():
 
     if len(submitted_songs) < 2:
         print(winner.id, "won the game")
+        end(winner)
         return
 
     random.shuffle(submitted_songs)
     cur_songs = [submitted_songs[0], submitted_songs[1]]
     round_num += 1
+
+def end(win: Cur_Song):
+    global status, winner, cur_songs
+
+    status = 2
+    winner = win
+    cur_songs = []
