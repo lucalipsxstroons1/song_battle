@@ -20,9 +20,7 @@ function connectWebSocket() {
       if (data.timer === 0) {
         disableVoting();
         document.getElementById("timer").textContent = "🛑 Zeit abgelaufen!";
-        
-        // Starte nächste Runde automatisch
-        setTimeout(() => loadNextBattle(), 1500); // Kurze Pause zum Anzeigen "Zeit abgelaufen"
+        setTimeout(() => loadNextBattle(), 1500); // Nächste Runde
       }
     }
   };
@@ -82,7 +80,11 @@ async function loadNextBattle() {
     document.getElementById("iframe2").src = `https://open.spotify.com/embed/track/${song2}`;
 
     enableVoting();
-    ws.send("start");
+    if (ws.readyState === 1) {
+      ws.send("start");
+    } else {
+      console.warn("WebSocket nicht bereit!");
+    }    
   } catch (err) {
     console.warn("Turnier vorbei oder Fehler:", err);
     const winnerRes = await fetch("http://localhost:8000/winner");
@@ -150,17 +152,16 @@ function showWinner(embedUrl) {
 }
 
 function goToStart() {
-  window.location.href = "/index.html";
+  window.location.href = "/../index.html";
 }
 
 function restartGame() {
-  // Spieler-ID beibehalten, aber Spielstatus zurücksetzen
   fetch("http://localhost:8000/reset", {
     method: "POST"
   }).then(res => {
     if (res.ok) {
       alert("🔁 Spiel wurde zurückgesetzt.");
-      window.location.href = "/battle/battle.html"; // Direkt neues Spiel
+      window.location.href = "/battle/battle.html";
     } else {
       alert("⚠️ Fehler beim Zurücksetzen des Spiels.");
     }
