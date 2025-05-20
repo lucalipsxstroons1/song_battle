@@ -181,3 +181,37 @@ button {
   z-index: 0;
   border-radius: 10px;
 }
+
+.spotify-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 20px; /* Abstand zwischen Text und Icon */
+}
+
+.spotify-link a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.spotify-link img {
+  margin-left: 20px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.spotify-link img:hover {
+  transform: scale(1.1);
+}
+
+.spotify-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+}
+
+
