@@ -84,6 +84,9 @@ async def post_vote(song: Song, player_uuid: str):
     if not playerid in battle.ready_players:
         raise HTTPException(status_code=403, detail="Not a valid player")
 
+    if battle.check_player_voted(playerid):
+        raise HTTPException(status_code=403, detail="Player already voted")
+
     return battle.vote(playerid, song.song)
 
 @app.get("/votes")
