@@ -59,24 +59,26 @@ def next_stage():
 
     winner = cur_songs[0]
     winner_votes = len(cur_songs[0].votes)
+    cur_songs[0].votes.clear()
 
     for cur_song in cur_songs[1::]:
         if len(cur_song.votes) > winner_votes:
             winner = cur_song
             winner_votes = len(cur_song.votes)
 
-    print("Winner:", winner)
+        cur_song.votes.clear()
+
+    print(f"Winner for round {round}:", winner)
 
     for cur_song in submitted_songs:
-        print(cur_song.id)
         if cur_song in cur_songs and cur_song != winner:
             print("Remove loser:", cur_song.id)
             submitted_songs.remove(cur_song)
-            print(submitted_songs)
 
     if len(submitted_songs) < 2:
-        print(winner.id, "won")
+        print(winner.id, "won the game")
         return
 
+    random.shuffle(submitted_songs)
     cur_songs = [submitted_songs[0], submitted_songs[1]]
     round_num += 1
