@@ -103,7 +103,6 @@ async function vote(index) {
 
   const trackId1 = extractTrackIdFromEmbed(iframe1);
   const trackId2 = extractTrackIdFromEmbed(iframe2);
-
   const trackId = index === 0 ? trackId1 : trackId2;
 
   if (!playerId) {
@@ -118,8 +117,6 @@ async function vote(index) {
       body: JSON.stringify({ song: trackId }),
     });
 
-    await updateVoteProgress();
-
     if (!res.ok) {
       const err = await res.json();
       alert(`Fehler beim Voten: ${err.detail}`);
@@ -128,16 +125,21 @@ async function vote(index) {
 
     console.log("Vote erfolgreich:", trackId);
     disableVoting();
+
     document.querySelectorAll("button.glow-on-hover").forEach((btn, i) => {
       btn.textContent = i === index ? "✅ Deine Stimme" : "❌";
       btn.style.backgroundColor = i === index ? "#4CAF50" : "#ccc";
     });
+
+    // 🟢 Jetzt: Progress anzeigen NACH erfolgreichem Vote
+    setTimeout(updateVoteProgress, 100); // Optional leichter Delay
 
   } catch (err) {
     console.error("Fehler beim Voten:", err);
     alert("Netzwerkfehler beim Voten.");
   }
 }
+
 
 function extractTrackIdFromEmbed(embedUrl) {
   const parts = embedUrl.split("/track/");
