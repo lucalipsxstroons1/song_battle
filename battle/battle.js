@@ -1,38 +1,16 @@
-let allSongs = []; // enthält alle Spotify-Embed-Links
-let round = 1;
-let currentIndex = 0;
-let nextRound = [];
-let timerInterval;
 let ws;
+let playerId = localStorage.getItem("player_id");
 
 window.onload = async () => {
-  try {
-    connectWebSocket();
-    const response = await fetch("http://localhost:8000/getcur");
-    if (!response.ok) throw new Error("Songs konnten nicht geladen werden.");
-
-    const songIds = await response.json(); // ["f759060d84744845", "2765818cf77b4312"]
-    console.log("Erhaltene IDs:", songIds);
-
-    // IDs direkt in Embed-URLs einfügen
-    allSongs = songIds.map(id => `https://open.spotify.com/embed/track/${id}`);
-
-    document.getElementById("battle-container").style.display = "block";
-    showNextBattle(); // Songs anzeigen und Countdown starten
-  } catch (err) {
-    alert("Fehler beim Laden der Songs!");
-    console.error(err);
-  }
+  connectWebSocket();
+  await loadNextBattle();
 };
-
 
 function connectWebSocket() {
   ws = new WebSocket("ws://localhost:8000/ws/timer");
 
   ws.onopen = () => {
-    console.log("WebSocket verbunden.");
-    // Nur ein Spieler darf "start" senden – z. B. Moderator
-     // ggf. nur bei Bedarf auslösen
+    console.log("WebSocket verbunden");
   };
 
   ws.onmessage = (event) => {
@@ -42,12 +20,15 @@ function connectWebSocket() {
       if (data.timer === 0) {
         disableVoting();
         document.getElementById("timer").textContent = "🛑 Zeit abgelaufen!";
+        
+        // Starte nächste Runde automatisch
+        setTimeout(() => loadNextBattle(), 1500); // Kurze Pause zum Anzeigen "Zeit abgelaufen"
       }
     }
   };
 
   ws.onclose = () => {
-    console.warn("WebSocket getrennt. Erneuter Verbindungsversuch in 2s.");
+    console.warn("WebSocket getrennt – reconnect in 2s");
     setTimeout(connectWebSocket, 2000);
   };
 }
@@ -57,100 +38,134 @@ function updateTimerDisplay(seconds) {
   el.textContent = `⏳ ${seconds}s`;
 }
 
-function disableVoting() {
-  const buttons = document.querySelectorAll("button.glow-on-hover");
-  buttons.forEach(btn => btn.disabled = true);
-}
+async function updateVoteProgress() {
+  try {
+    const res = await fetch("http://localhost:8000/votes");
+    if (!res.ok) return;
 
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
+    const data = await res.json();
+    const totalVotes = Object.values(data.votes).reduce((a, b) => a + b, 0);
+    const totalPlayers = data.total;
 
-function showNextBattle() {
-  document.getElementById("round-label").textContent = `Runde ${round}`;
+    const percent = (totalVotes / totalPlayers) * 100;
 
-  if (currentIndex >= allSongs.length) {
-    if (nextRound.length === 1) {
-      showWinner(nextRound[0]);
-      return;
-    }
-    allSongs = nextRound;
-    nextRound = [];
-    currentIndex = 0;
-    round++;
-    showNextBattle();
-    return;
+    document.getElementById("vote-status-text").textContent =
+      `🗳 ${totalVotes} von ${totalPlayers} Stimmen`;
+
+    document.getElementById("vote-bar").style.width = `${percent}%`;
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Stimmen:", err);
   }
+}
 
-  const song1 = allSongs[currentIndex];
-  const song2 = allSongs[currentIndex + 1];
-
-  document.getElementById("iframe1").src = song1;
-  document.getElementById("iframe2").src = song2;
-
-  enableVoting(); // Neue Runde → Buttons wieder aktivieren
-  ws.send("start"); // Countdown starten
+function disableVoting() {
+  document.querySelectorAll("button.glow-on-hover").forEach(btn => {
+    btn.disabled = true;
+  });
 }
 
 function enableVoting() {
-  const buttons = document.querySelectorAll("button.glow-on-hover");
-  buttons.forEach(btn => btn.disabled = false);
+  document.querySelectorAll("button.glow-on-hover").forEach(btn => {
+    btn.disabled = false;
+    btn.textContent = "Vote for this Song!";
+    btn.style.backgroundColor = "";
+  });
 }
 
-function showWinner(song) {
-  document.querySelector(".battle-container").style.display = "none";
-  document.getElementById("round-label").style.display = "none";
-  document.getElementById("winner-section").style.display = "block";
-  document.getElementById("winner-iframe").src = song;
+async function loadNextBattle() {
+  try {
+    const response = await fetch("http://localhost:8000/getcur");
+    if (!response.ok) throw new Error("Keine Songs verfügbar");
+
+    const [song1, song2] = await response.json();
+    document.getElementById("iframe1").src = `https://open.spotify.com/embed/track/${song1}`;
+    document.getElementById("iframe2").src = `https://open.spotify.com/embed/track/${song2}`;
+
+    enableVoting();
+    ws.send("start");
+  } catch (err) {
+    console.warn("Turnier vorbei oder Fehler:", err);
+    const winnerRes = await fetch("http://localhost:8000/winner");
+    if (winnerRes.ok) {
+      const data = await winnerRes.json();
+      showWinner(`https://open.spotify.com/embed/track/${data}`);
+    } else {
+      alert("Das Spiel ist vorbei oder kein Gewinner vorhanden.");
+    }
+  }
 }
 
 async function vote(index) {
-  const chosen = allSongs[index + currentIndex]; // embed URL
-  const trackId = extractTrackIdFromEmbed(chosen);
-  const playerId = localStorage.getItem("player_id");
+  const iframe1 = document.getElementById("iframe1").src;
+  const iframe2 = document.getElementById("iframe2").src;
+
+  const trackId1 = extractTrackIdFromEmbed(iframe1);
+  const trackId2 = extractTrackIdFromEmbed(iframe2);
+
+  const trackId = index === 0 ? trackId1 : trackId2;
 
   if (!playerId) {
-    alert("Spieler-ID fehlt!");
+    alert("Deine Spieler-ID fehlt.");
     return;
   }
 
   try {
-    const response = await fetch(`http://localhost:8000/vote?player_uuid=${playerId}`, {
+    const res = await fetch(`http://localhost:8000/vote?player_uuid=${playerId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ song: trackId })
+      body: JSON.stringify({ song: trackId }),
     });
 
-    if (!response.ok) {
-      const err = await response.json();
-      return alert(`Fehler beim Voten: ${err.detail}`);
+    await updateVoteProgress();
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(`Fehler beim Voten: ${err.detail}`);
+      return;
     }
 
-    console.log("Vote erfolgreich für:", trackId);
-
-    // Feedback sichtbar machen
+    console.log("Vote erfolgreich:", trackId);
     disableVoting();
     document.querySelectorAll("button.glow-on-hover").forEach((btn, i) => {
       btn.textContent = i === index ? "✅ Deine Stimme" : "❌";
       btn.style.backgroundColor = i === index ? "#4CAF50" : "#ccc";
     });
 
-    // Automatisch nach 2s nächste Runde starten
-    setTimeout(() => {
-      nextRound.push(chosen);
-      currentIndex += 2;
-      showNextBattle();
-    }, 2000);
-
   } catch (err) {
-    console.error("Vote-Fehler:", err);
-    alert("Fehler beim Senden deiner Stimme.");
+    console.error("Fehler beim Voten:", err);
+    alert("Netzwerkfehler beim Voten.");
   }
 }
 
 function extractTrackIdFromEmbed(embedUrl) {
   const parts = embedUrl.split("/track/");
-  if (parts.length < 2) return null;
-  return parts[1].split("?")[0];
+  return parts[1]?.split("?")[0];
 }
 
+function showWinner(embedUrl) {
+  document.querySelector(".battle-container").style.display = "none";
+  document.getElementById("round-label").style.display = "none";
+  document.getElementById("winner-section").style.display = "block";
+  document.getElementById("winner-iframe").src = embedUrl;
+}
+
+function goToStart() {
+  window.location.href = "/index.html";
+}
+
+function restartGame() {
+  // Spieler-ID beibehalten, aber Spielstatus zurücksetzen
+  fetch("http://localhost:8000/reset", {
+    method: "POST"
+  }).then(res => {
+    if (res.ok) {
+      alert("🔁 Spiel wurde zurückgesetzt.");
+      window.location.href = "/battle/battle.html"; // Direkt neues Spiel
+    } else {
+      alert("⚠️ Fehler beim Zurücksetzen des Spiels.");
+    }
+  }).catch(err => {
+    console.error("Fehler beim Reset:", err);
+    alert("⚠️ Netzwerkfehler beim Zurücksetzen.");
+  });
+}

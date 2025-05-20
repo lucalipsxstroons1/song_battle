@@ -8,26 +8,47 @@
 </head>
 
 <body>
-  <div class="container">
-    <h1>🎶 Song Battle</h1>
-    <h2 id="round-label">Round 1</h2>
-    <div id="timer" style="font-size: 2rem; text-align: center; margin-bottom: 20px;">⏳ 60s</div>
-    <div class="battle-container" id="battle-container">
+  <main class="container">
+    <header>
+      <h1>🎶 Song Battle</h1>
+      <h2 id="round-label">Runde 1</h2>
+    </header>
+
+    <section id="timer-section" style="text-align: center; margin-bottom: 20px;">
+      <div id="timer" style="font-size: 2rem;">⏳ 60s</div>
+    </section>
+
+    <section class="battle-container" id="battle-container">
       <div class="song" id="song1">
-        <iframe id="iframe1" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        <iframe id="iframe1" width="100%" height="80" frameborder="0" allow="encrypted-media"></iframe>
         <button class="glow-on-hover" type="button" onclick="vote(0)">Vote for this Song!</button>
       </div>
+
       <div class="song" id="song2">
-        <iframe id="iframe2" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        <iframe id="iframe2" width="100%" height="80" frameborder="0" allow="encrypted-media"></iframe>
         <button class="glow-on-hover" type="button" onclick="vote(1)">Vote for this Song!</button>
       </div>
-    </div>
+    </section>
 
-    <div id="winner-section" style="display: none;">
-      <h2>🏆 The Winner is....</h2>
-      <iframe id="winner-iframe" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+    <div id="vote-progress" style="text-align: center; margin-bottom: 10px;">
+      <div id="vote-status-text">🗳 0 von ? Stimmen</div>
+      <div style="width: 100%; background: #ddd; height: 10px; border-radius: 5px; margin-top: 5px;">
+        <div id="vote-bar" style="width: 0%; height: 100%; background: #4CAF50; border-radius: 5px;"></div>
+      </div>
     </div>
-  </div>
+    
+
+    <section id="winner-section" style="display: none; text-align: center;">
+      <h2>🏆 The Winner is...</h2>
+      <iframe id="winner-iframe" width="100%" height="80" frameborder="0" allow="encrypted-media"></iframe>
+      
+      <div style="margin-top: 20px;">
+        <button onclick="goToStart()" class="glow-on-hover">🔁 Zurück zur Startseite</button>
+        <button onclick="restartGame()" class="glow-on-hover" style="margin-left: 10px;">🔄 Neues Spiel starten</button>
+      </div>
+    </section>
+    
+  </main>
 
   <script src="battle.js"></script>
 </body>
