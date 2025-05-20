@@ -60,7 +60,7 @@ readyBtn.onclick = async () => {
 
     if (data.status === "start") {
       alert("🎮 Das Spiel beginnt!");
-      window.location.href = "battle/battle.html";
+      window.location.href = "/timer_vor/countdown.html";
     } else {
       alert("✅ Du bist bereit – warte auf andere Spieler...");
       startPollingForStart();
@@ -80,7 +80,7 @@ function startPollingForStart() {
       if (data.status === 1) {
         clearInterval(intervalId); // Stop polling
         alert("🎮 Das Spiel beginnt!");
-        window.location.href = "battle/battle.html";
+        window.location.href = "/timer_vor/countdown.html";
       }
     } catch (err) {
       console.error("Polling-Fehler:", err);
