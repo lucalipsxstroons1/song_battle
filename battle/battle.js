@@ -82,12 +82,38 @@ function enableVoting() {
   buttons.forEach(btn => btn.disabled = false);
 }
 
-function vote(index) {
-  const chosen = index === 0 ? allSongs[currentIndex] : allSongs[currentIndex + 1];
-  nextRound.push(chosen);
-  currentIndex += 2;
-  showNextBattle();
+async function vote(index) {
+  const chosen = allSongs[index + currentIndex]; // embed URL
+  const trackId = extractTrackIdFromEmbed(chosen);
+  const playerId = localStorage.getItem("player_id");
+
+  if (!playerId) {
+    alert("Spieler-ID fehlt!");
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:8000/vote?player_uuid=${playerId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ song: trackId })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      return alert(`Fehler beim Voten: ${err.detail}`);
+    }
+
+    console.log("Vote erfolgreich für:", trackId);
+    nextRound.push(chosen);
+    currentIndex += 2;
+    showNextBattle();
+  } catch (err) {
+    console.error("Vote-Fehler:", err);
+    alert("Fehler beim Senden deiner Stimme.");
+  }
 }
+
 
 function showWinner(song) {
   document.querySelector(".battle-container").style.display = "none";
