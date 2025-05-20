@@ -3,6 +3,7 @@ let round = 1;
 let currentIndex = 0;
 let nextRound = [];
 let timerInterval;
+let ws;
 
 window.onload = async () => {
   try {
@@ -24,22 +25,35 @@ window.onload = async () => {
 };
 
 
-function startTimer(duration, displayEl) {
-  clearInterval(timerInterval); // Vorherigen Timer stoppen
+function connectWebSocket() {
+  ws = new WebSocket("ws://localhost:8000/ws/timer");
 
-  let time = duration;
-  displayEl.textContent = `⏳ ${time}s`;
+  ws.onopen = () => {
+    console.log("WebSocket verbunden.");
+    // Nur ein Spieler darf "start" senden – z. B. Moderator
+    // ws.send("start"); // ggf. nur bei Bedarf auslösen
+  };
 
-  timerInterval = setInterval(() => {
-    time--;
-    displayEl.textContent = `⏳ ${time}s`;
-
-    if (time <= 0) {
-      clearInterval(timerInterval);
-      displayEl.textContent = "🛑 Zeit abgelaufen!";
-      disableVoting();
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.timer !== undefined) {
+      updateTimerDisplay(data.timer);
+      if (data.timer === 0) {
+        disableVoting();
+        document.getElementById("timer").textContent = "🛑 Zeit abgelaufen!";
+      }
     }
-  }, 1000);
+  };
+
+  ws.onclose = () => {
+    console.warn("WebSocket getrennt. Erneuter Verbindungsversuch in 2s.");
+    setTimeout(connectWebSocket, 2000);
+  };
+}
+
+function updateTimerDisplay(seconds) {
+  const el = document.getElementById("timer");
+  el.textContent = `⏳ ${seconds}s`;
 }
 
 function disableVoting() {
@@ -74,7 +88,7 @@ function showNextBattle() {
   document.getElementById("iframe2").src = song2;
 
   enableVoting(); // Neue Runde → Buttons wieder aktivieren
-  startTimer(60, document.getElementById("timer")); // Countdown starten
+  //startTimer(60, document.getElementById("timer")); // Countdown starten
 }
 
 function enableVoting() {
